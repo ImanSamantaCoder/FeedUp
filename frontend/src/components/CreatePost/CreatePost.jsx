@@ -6,8 +6,9 @@ import Post from "../Post";
 const CreatePost = () => {
   const [showFullForm, setShowFullForm] = useState(false);
   const [caption, setCaption] = useState("");
-  const [insertText, setinsertText] = useState("");
+  const [insertText, setInsertText] = useState("");
   const [image, setImage] = useState(null);
+  const [preview, setPreview] = useState(null); // For image preview
   const [post, setPost] = useState([]);
   const [error, setError] = useState(""); // for error handling
 
@@ -25,6 +26,13 @@ const CreatePost = () => {
     update();
   }, []);
 
+  // Handle image selection and preview
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    setImage(file);
+    setPreview(URL.createObjectURL(file)); // Generate preview
+  };
+
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,23 +42,20 @@ const CreatePost = () => {
     formData.append("image", image);
     formData.append("caption", caption);
     formData.append("insertText", insertText);
-    for (let [key, value] of formData.entries()) {
-      console.log(key, value);
-    }
-    
+
     try {
-      const response = await axios.post(
-        "http://localhost:8000/listings", // Backend API endpoint
-        formData, // Send the formData directly
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
+      await axios.post("http://localhost:8000/listings", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       alert("Post uploaded successfully!");
       // Refetch posts after successful submission
       const data = await axios.get("http://localhost:8000/listings");
       setPost([...data.data]);
       setShowFullForm(false); // Close form
+      setCaption("");
+      setInsertText("");
+      setImage(null);
+      setPreview(null);
     } catch (error) {
       setError("Error creating post: " + (error.response?.data || error.message));
       console.error("Error creating post:", error);
@@ -63,44 +68,68 @@ const CreatePost = () => {
         {showFullForm && <div className="overlay"></div>}
 
         {!showFullForm ? (
-          <div className="card p-3" onClick={() => setShowFullForm(true)}>
-            <h4>Create a Post</h4>
+          <div className="card p-3 create-card" onClick={() => setShowFullForm(true)}>
+            <h4 className="text-primary">Create a Post</h4>
             <textarea
               className="form-control mb-2"
               placeholder="What's on your mind?"
+              readOnly
             />
           </div>
         ) : (
           <div className="modal-container">
-            <div className="card p-3 modal-content">
-              <h4>Create a Post</h4>
+            <div className="card p-4 modal-content shadow-lg">
+              <h4 className="text-center text-dark mb-3">Create a Post</h4>
 
               <form onSubmit={handleSubmit}>
-                <input
-                  type="text"
-                  placeholder="Caption"
-                  value={caption}
-                  onChange={(e) => setCaption(e.target.value)}
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Extra Text"
-                  value={insertText}
-                  onChange={(e) => setinsertText(e.target.value)}
-                />
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setImage(e.target.files[0])}
-                  required
-                />
-                <button type="submit">Upload</button>
+                <div className="mb-3">
+                  <label className="form-label fw-bold">Caption</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Enter caption..."
+                    value={caption}
+                    onChange={(e) => setCaption(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label className="form-label fw-bold">Extra Text</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Additional text (optional)"
+                    value={insertText}
+                    onChange={(e) => setInsertText(e.target.value)}
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label className="form-label fw-bold">Upload Image</label>
+                  <input
+                    type="file"
+                    className="form-control"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    required
+                  />
+                  {preview && (
+                    <div className="mt-2 text-center">
+                      <img src={preview} alt="Preview" className="img-thumbnail preview-img" />
+                    </div>
+                  )}
+                </div>
+
+                <button type="submit" className="btn btn-primary w-100 fw-bold">
+                  Upload Post
+                </button>
               </form>
 
-              {error && <div className="error-message">{error}</div>} {/* Display error message */}
+              {error && <div className="alert alert-danger mt-3">{error}</div>}
+
               <button
-                className="btn btn-secondary mt-2"
+                className="btn btn-secondary mt-3 w-100"
                 onClick={() => setShowFullForm(false)}
               >
                 Cancel
@@ -111,9 +140,7 @@ const CreatePost = () => {
       </div>
 
       {post.length > 0 ? (
-        post.map((post, index) => (
-          <Post key={post._id || index} post={post} />
-        ))
+        post.map((post, index) => <Post key={post._id || index} post={post} />)
       ) : (
         <p className="text-center mt-4">No posts available.</p>
       )}
