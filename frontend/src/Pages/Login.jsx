@@ -14,17 +14,26 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-
+  
     try {
-      const response = await axios.post("http://localhost:8000/auth/login", formData);
+      const response = await axios.post(
+        "http://localhost:8000/auth/login",
+        formData,
+        {
+          withCredentials: true, // ✅ Allows cookies & sessions to be sent
+        }
+      )
+  
       if (response.data.success) {
-        alert(response.data.message); // Optional: Show success message
-        navigate("/"); // Redirect to Home after login
+        alert(response.data.message);
+        navigate("/"); // Redirect after login
       }
     } catch (err) {
       setError(err.response?.data?.message || "Login failed. Please check your credentials.");
     }
   };
+  
+  
 
   return (
     <div className="container mt-3">

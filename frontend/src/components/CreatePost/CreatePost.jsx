@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import "./CreatePost.css"; // Import the CSS file for styling
+import "./CreatePost.css";
 import Post from "../Post";
 
 const CreatePost = () => {
@@ -8,9 +8,29 @@ const CreatePost = () => {
   const [caption, setCaption] = useState("");
   const [insertText, setInsertText] = useState("");
   const [image, setImage] = useState(null);
-  const [preview, setPreview] = useState(null); // For image preview
+  const [preview, setPreview] = useState(null);
   const [post, setPost] = useState([]);
-  const [error, setError] = useState(""); // for error handling
+  const [error, setError] = useState("");
+  const [user, setUser] = useState(null); // Store the logged-in user
+
+  // Fetch the authenticated user
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await axios.get("http://localhost:8000/listings/check-auth", {
+          withCredentials: true, // Send cookies/session data
+        });
+
+        if (response.data.authenticated) {
+          setUser(response.data.user);
+        }
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   // Fetch posts once when the component mounts
   useEffect(() => {
@@ -30,28 +50,34 @@ const CreatePost = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     setImage(file);
-    setPreview(URL.createObjectURL(file)); // Generate preview
+    setPreview(URL.createObjectURL(file));
   };
 
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!image) return alert("Please select an image!");
+    if (!user) return alert("User not authenticated!");
 
     const formData = new FormData();
     formData.append("image", image);
     formData.append("caption", caption);
     formData.append("insertText", insertText);
+    formData.append("owner", user._id); // Pass the user ID
 
     try {
       await axios.post("http://localhost:8000/listings", formData, {
         headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true, // Ensure credentials are sent
       });
+
       alert("Post uploaded successfully!");
+
       // Refetch posts after successful submission
       const data = await axios.get("http://localhost:8000/listings");
       setPost([...data.data]);
-      setShowFullForm(false); // Close form
+
+      setShowFullForm(false);
       setCaption("");
       setInsertText("");
       setImage(null);
