@@ -19,6 +19,15 @@ Real-time Updates: Dynamic updates using React.
 Tech Stack
 
 Frontend: HTML, CSS, JavaScript, React
+Future Enhancements
+
+Implement real-time chat feature
+
+Add image uploads for posts
+
+Improve UI/UX with better styling
+
+
 
 Backend: Node.js, Express.js
 
