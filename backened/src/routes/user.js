@@ -1,9 +1,18 @@
 import express from "express";
 import passport from "passport";
 import User from "../models/user.js"; // ✅ Import correctly
+import { isAuthenticated } from "../middleware/auth.js";
 
 const router = express.Router();
-
+router.get("/users", isAuthenticated, async (req, res) => {
+    try {
+      const users = await User.find({ _id: { $ne: req.user._id } });
+      res.json(users);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching users", error });
+    }
+  });
+  
 router.post("/signup", async (req, res, next) => {
     try {
         let { username, email, password } = req.body;

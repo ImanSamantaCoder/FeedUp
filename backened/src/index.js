@@ -12,6 +12,7 @@ import listingsRouter from "./routes/listing.js";
 import User from "./models/user.js";
 import userRouter from "./routes/user.js";
 import MongoStore from "connect-mongo";
+import followRouter from "./routes/follow.js";
 dotenv.config(); // Loads .env file into process.env
 
 const app = express();
@@ -93,6 +94,8 @@ app.get("/", (req, res) => {
 });
 app.use("/listings", listingsRouter);
 app.use("/auth", userRouter);
+app.use("/follow", followRouter);
+
 
 // 404 Handler
 

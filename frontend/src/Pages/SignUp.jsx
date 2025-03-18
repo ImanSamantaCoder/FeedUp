@@ -19,7 +19,7 @@ const SignUp = () => {
       const response = await axios.post("http://localhost:8000/auth/signup", formData);
       if (response.data.success) {
         alert(response.data.message); // Optional: Show success message
-        navigate("/"); // Redirect to Home after signup
+        navigate("/login"); // Redirect to Home after signup
       }
     } catch (err) {
       setError(err.response?.data?.message || "Signup failed. Please try again.");
