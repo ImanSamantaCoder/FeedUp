@@ -9,7 +9,7 @@ const CreatePost = () => {
   const [insertText, setInsertText] = useState("");
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
-  const [post, setPost] = useState([]);
+  const [posts, setPosts] = useState([]);
   const [error, setError] = useState("");
   const [user, setUser] = useState(null); // Store the logged-in user
 
@@ -32,19 +32,34 @@ const CreatePost = () => {
     fetchUser();
   }, []);
 
-  // Fetch posts once when the component mounts
+  // Fetch all posts
   useEffect(() => {
-    const update = async () => {
+    const fetchPosts = async () => {
       try {
-        const data = await axios.get("http://localhost:8000/listings");
-        setPost([...data.data]);
+        const response = await axios.get("http://localhost:8000/listings");
+        setPosts(response.data);
       } catch (err) {
         setError("Error fetching posts!");
         console.error(err);
       }
     };
-    update();
+    fetchPosts();
   }, []);
+
+  // Filter posts based on user following
+  const filteredPosts = posts.filter((post) => {
+    if (!user) return false; // Ensure user exists before filtering
+  
+    console.log("Checking Post Owner:", post.owner, "User ID:", user._id);
+  
+    const postOwnerId = post.owner._id ? post.owner._id.toString() : post.owner.toString();
+  
+    return (
+      // postOwnerId === user._id.toString() ||
+      user.following.some((followingId) => followingId.toString() === postOwnerId)
+    );
+  });
+  
 
   // Handle image selection and preview
   const handleImageChange = (e) => {
@@ -75,7 +90,7 @@ const CreatePost = () => {
 
       // Refetch posts after successful submission
       const data = await axios.get("http://localhost:8000/listings");
-      setPost([...data.data]);
+      setPosts(data.data);
 
       setShowFullForm(false);
       setCaption("");
@@ -165,8 +180,9 @@ const CreatePost = () => {
         )}
       </div>
 
-      {post.length > 0 ? (
-        post.map((post, index) => <Post key={post._id || index} post={post} />)
+      {/* Show only filtered posts */}
+      {filteredPosts.length > 0 ? (
+        filteredPosts.map((post) => <Post key={post._id} post={post} />)
       ) : (
         <p className="text-center mt-4">No posts available.</p>
       )}
