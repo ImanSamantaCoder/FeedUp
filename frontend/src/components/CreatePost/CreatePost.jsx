@@ -11,6 +11,7 @@ const CreatePost = () => {
   const [preview, setPreview] = useState(null);
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState("");
+  
   const [user, setUser] = useState(null); // Store the logged-in user
 
   // Fetch the authenticated user
@@ -55,7 +56,7 @@ const CreatePost = () => {
     const postOwnerId = post.owner._id ? post.owner._id.toString() : post.owner.toString();
   
     return (
-      // postOwnerId === user._id.toString() ||
+      postOwnerId === user._id.toString() ||
       user.following.some((followingId) => followingId.toString() === postOwnerId)
     );
   });

@@ -2,6 +2,7 @@ import express from "express";
 import multer from "multer";
 import { cloudinary } from "../cloudConfig.js";
 import Listing from "../Models/listing.js";
+import mongoose from "mongoose";
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -82,4 +83,69 @@ router
     console.log("Authenticated User:", req.user);
     res.json({ authenticated: !!req.user, user: req.user });
   });
+  router.post("/:id/like", async (req, res) => {
+    try {
+      console.log("✅ Like route hit for post:", req.params.id);
+      
+      if (!req.user) {
+        console.log("❌ Unauthorized: req.user is missing");
+        return res.status(401).json({ message: "Unauthorized! Please log in." });
+      }
+  
+      console.log("🔍 User trying to like post:", req.user._id);
+  
+      const post = await Listing.findById(req.params.id);
+      if (!post) {
+        console.log("❌ Post not found");
+        return res.status(404).json({ message: "Post not found" });
+      }
+  
+      console.log("Post found:", post);
+  
+      const alreadyLiked = post.likedBy.includes(req.user._id);
+      if (alreadyLiked) {
+        console.log("✅ User already liked the post, removing like...");
+        post.likedBy = post.likedBy.filter(id => id.toString() !== req.user._id.toString());
+        post.likesCount -= 1;
+      } else {
+        console.log("✅ User has not liked the post, adding like...");
+        post.likedBy.push(req.user._id);
+        post.likesCount += 1;
+      }
+  
+      await post.save();
+      console.log("✅ Updated Post:", post);
+  
+      res.json({ likesCount: post.likesCount, likedBy: post.likedBy });
+    } catch (error) {
+      console.error("🔥 Error in like route:", error);
+      res.status(500).json({ message: "Server error", error: error.message });
+    }
+  });
+  
+
+router.get("/:id/like", async (req, res) => {
+    console.log("Request ID:", req.params.id);
+
+    try {
+      const post = await Listing.findById(new mongoose.Types.ObjectId(req.params.id))
+        .populate("likedBy");
+
+      if (!post) {
+        console.log("Post not found for ID:", req.params.id);
+        return res.status(404).json({ message: "Post not found" });
+      }
+
+      console.log("listing router post", post);
+      res.json({ likesCount: post.likesCount, likedBy: post.likedBy });
+    } catch (error) {
+      console.error("Server error:", error.message);
+      res.status(500).json({ message: "Server error", error: error.message });
+    }
+});
+
+  
+  
+  
+  
 export default router;

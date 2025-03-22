@@ -1,11 +1,14 @@
 import mongoose from "mongoose";
 
 const listingSchema = new mongoose.Schema({
-  caption: { type: String, required: true },
-  insertText: { type: String },
-  imageUrl: { type: String, required: true },
-  owner: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // Associate with user
+  caption: String,
+  insertText: String,
+  imageUrl: String,
+  owner: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  likesCount: { type: Number, default: 0 },  // ✅ Ensure default is 0
+  likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]  // ✅ Store user IDs
 });
+
 
 const Listing = mongoose.model("Listing", listingSchema);
 export default Listing;

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import "./Login.css"; // Importing CSS file
 
 const Login = () => {
   const [formData, setFormData] = useState({ username: "", password: "" });
@@ -14,42 +15,42 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-  
+
     try {
       const response = await axios.post(
         "http://localhost:8000/auth/login",
         formData,
         {
-          withCredentials: true, // ✅ Allows cookies & sessions to be sent
+          withCredentials: true,
         }
-      )
-  
+      );
+
       if (response.data.success) {
         alert(response.data.message);
-        navigate("/"); // Redirect after login
+        navigate("/");
       }
     } catch (err) {
       setError(err.response?.data?.message || "Login failed. Please check your credentials.");
     }
   };
-  
-  
 
   return (
-    <div className="container mt-3">
-      <h2>Login</h2>
-      {error && <p className="text-danger">{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label>Username:</label>
-          <input type="text" name="username" className="form-control" onChange={handleChange} required />
-        </div>
-        <div className="mb-3">
-          <label>Password:</label>
-          <input type="password" name="password" className="form-control" onChange={handleChange} required />
-        </div>
-        <button type="submit" className="btn btn-primary">Login</button>
-      </form>
+    <div className="login-container">
+      <div className="login-box">
+        <h2>Login</h2>
+        {error && <p className="error-text">{error}</p>}
+        <form onSubmit={handleSubmit}>
+          <div className="input-group">
+            <label>Username:</label>
+            <input type="text" name="username" onChange={handleChange} required />
+          </div>
+          <div className="input-group">
+            <label>Password:</label>
+            <input type="password" name="password" onChange={handleChange} required />
+          </div>
+          <button type="submit" className="btn-login">Login</button>
+        </form>
+      </div>
     </div>
   );
 };

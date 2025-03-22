@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import LikeButton from "./LikeButton";
 
 const Post = ({ post }) => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
+    console.log(post);
     const fetchUser = async () => {
       try {
         const response = await axios.get("http://localhost:8000/listings/check-auth", {
@@ -21,7 +23,7 @@ const Post = ({ post }) => {
 
     fetchUser();
   }, []);
-
+  
   const handleDelete = async () => {
     try {
       const response = await axios.delete(`http://localhost:8000/listings/${post._id}`, {
@@ -80,9 +82,8 @@ const Post = ({ post }) => {
       )}
 
       <div className="mt-auto pt-3 d-flex justify-content-between">
-        <button className="btn btn-light shadow-sm">
-          <i className="fa-solid fa-thumbs-up" style={{ color: "#235cbe" }}></i> 0 Likes
-        </button>
+        <LikeButton postId={post._id} />
+
         <button className="btn btn-light shadow-sm">
           <i className="fa-solid fa-comments" style={{ color: "#63E6BE" }}></i> 0 Comments
         </button>
