@@ -2,7 +2,7 @@ FeedUp
 
 A full-stack social media application where users can create posts, view posts, follow other users, and get a personalized post feed based on their following list. Users can also like and comment on posts. Authentication is handled using Passport.js.
 
-Features
+Features 🪴
 
 User Authentication: Secure login and registration using Passport.js.
 
